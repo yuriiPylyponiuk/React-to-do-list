@@ -1,26 +1,24 @@
 import React from 'react';
-//import CreateSecondList from './createSecondList';
 import './secondListStyle.css';
 import cx from 'classnames';
 import multiply from '../../icons/multiply.svg';
 import check from '../../icons/check.svg';
+import { v4 as uuidv4 } from 'uuid';
 
 class SecondList extends React.Component {
   constructor(props){
     super(props);
     this.state= {
-      list: [
-        {id: 0, name: 'Wake up', checked: false},
-        {id: 1, name: 'Eat breakfast', checked: false},
-        {id: 1, name: 'Go to work', checked: false}
-      ],
-        value: ''
+      list: [],
+        value: '',
+        value2: '',
     }
 
     this.secondValueChange = this.secondValueChange.bind(this);
     this.secondListChange = this.secondListChange.bind(this);
     this.countNumber = this.countNumber.bind(this);
-    // this.changeCurentValue = this.changeCurentValue.bind(this);
+    this.shawNewInput = this.shawNewInput.bind(this);
+    this.newValue = this.newValue.bind(this);
   }
 
   secondValueChange(e) {
@@ -31,9 +29,10 @@ class SecondList extends React.Component {
     if( this.state.value != ''){
       this.setState( state => {
         let newObj = {
-          id: state.list.length,
+          id: uuidv4(),
           name: state.value,
-          checked: false
+          checked: false,
+          input: false
         }
 
         const secondList = [...state.list, newObj];
@@ -66,7 +65,8 @@ class SecondList extends React.Component {
               let obj={
                 id: item.id,
                 name: item.name,
-                checked: a
+                checked: a,
+                input: item.input
               }
               return obj;
             }
@@ -77,7 +77,7 @@ class SecondList extends React.Component {
         }
       });
       return{
-        list
+        list,
       }
     })
   }
@@ -91,34 +91,68 @@ class SecondList extends React.Component {
     })
     return num;
   }
+  shawNewInput= (i)=>{
+    let b ;
+    this.setState(state => {
+      const list = state.list.map((item,j) => {
+        if ( j===i){
+          for(let key in item){
+            if(key=='input'){
+              let a = item[key]= true;
+              b = item.name;
+              let obj={
+                id: item.id,
+                name: item.name,
+                checked: item.checked,
+                input: a,
+              }
+              return obj;
+            }
+          }
+          return item;
+        }else{
+          return item;
+        }
+      });
+      return{
+        list,
+        value2: b
+      }
+    })
+  }
+ 
+  newValue(e){
+    this.setState({value2: e.target.value})
+  }
+  setNewValue=(i)=>{
+    if( this.state.value2 != ''){
+      this.setState(state => {
+        const list = state.list.map((item,j) => {
+          if ( j===i){
+            for(let key in item){
+              if(key=='name'){
   
-  // changeCurentValue = (i) => {
-  //   this.setState(state => {
-  //     const list = state.list.map((item,j) => {
-  //       if ( j===i){
-  //         for(let key in item){
-  //           if(key=='name'){
-  //             console.log(j);
-              
-              
-  //             let obj={
-  //               id: item.id,
-  //               name: a,
-  //               checked: item.checked
-  //             }
-  //             return obj;
-  //           }
-  //         }
-  //         return item;
-  //       }else{
-  //         return item;
-  //       }
-  //     });
-  //     return{
-  //       list
-  //     }
-  //   })
-  // }
+                let obj={
+                  id: item.id,
+                  name: state.value2,
+                  checked: item.checked,
+                  input: false,
+                }
+                return obj;
+              }
+            }
+            return item;
+          }else{
+            return item;
+          }
+        });
+        return{
+          list,
+          value2: ''
+        }
+      })
+    }
+  }
 
   render(){
     
@@ -133,14 +167,15 @@ class SecondList extends React.Component {
             secondListItems: true,
             doneStyle: item.checked,
             })}>
-            {/* <input 
-              className='secondListText' 
-              onChange={()=> this.changeCurentValue(index)}
-              value={item.name}
-            /> */}
-            <span className='secondListText'>
-              {item.name}
-            </span>
+            {item.input
+              ? <form><input className = 'inputNewTask'
+                  onChange={this.newValue} 
+                  value={this.state.value2} 
+                  placeholder='What do you need to do?' 
+                  type="text"/>
+                  <button onClick = {()=>this.setNewValue(index)}>Change</button></form>
+              : <span onClick={() => this.shawNewInput(index)} className='secondListText'> {item.name} </span>
+            }  
             <div className="subTools">
               <button className='gbtn' onClick={()=> this.confirmClickEvent(index)}>
                 <img src={check} className="App-check" alt="check" />  
